@@ -1,0 +1,11 @@
+opencv-python
+numpy
+pillow
+tqdm
+matplotlib
+scipy
+diffusers
+transformers
+accelerate
+safetensors
+huggingface_hub
