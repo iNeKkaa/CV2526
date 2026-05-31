@@ -1,120 +1,106 @@
-# CV Seminars Project — Colourisation, Matting and Editing
+# CV Seminars Project — Colourisation, Video Matting and Video Editing
 
-This project skeleton is designed for the Computer Vision seminars project. It was tested on an NVIDIA RTX 3090 GPU, but it should normally work with any CUDA-compatible NVIDIA GPU, provided that the correct PyTorch CUDA version is installed.
-It processes the same 3 short videos through several methods from Seminars 2–4.
+This repository contains the code used for our Computer Vision Seminars project.
 
-The project is intentionally built as an experimental pipeline: the goal is not to obtain perfect videos, but to compare methods and discuss their strengths, weaknesses, artefacts, temporal coherence and computation cost.
+The goal of the project was to apply and compare several methods from the seminars on the same short videos:
+
+- **Colourisation**
+- **Video matting**
+- **Video editing**
+
+The project focuses not only on visual quality, but also on the analysis of artefacts, limitations, temporal consistency and method behaviour on realistic short videos.
 
 ---
 
-## 0. Important preprocessing choice
+## Authors
 
-By default, the scripts cut the videos as follows:
+- Antoine Metz — u271676
+- Corentin Le Bris — u271785
+
+---
+
+## Project overview
+
+We used three short input videos with different levels of difficulty:
+
+1. **Video 1 — simple human subject**  
+   A human subject with a relatively simple background.
+
+2. **Video 2 — street scene**  
+   A walking person with a more complex background and camera perspective.
+
+3. **Video 3 — dog / non-human moving subject**  
+   A non-human moving subject, useful to test generalisation beyond human-centred videos.
+
+All videos were processed with the same setup:
 
 ```text
 start time = 1 second
 duration   = 5 seconds
 fps        = 24
+frames     = 120 frames per video
 max side   = 768 pixels
 ```
 
-So the extracted clip corresponds to the interval:
+---
 
-```text
-from 1s to 6s of the original video
-```
+## Methods included
 
-This was chosen to skip the first moment where the camera may still be moving or the subject may not yet be visible. You can change it with `--start_time` if needed.
+### 1. Colourisation
+
+Two main colourisation methods were tested:
+
+- **OpenCV / Zhang learning-based colourisation**  
+  A pretrained neural network predicts plausible chrominance values from grayscale frames.
+
+- **Local exemplar-based colour transfer**  
+  Colours are transferred from a reference frame using local luminance and image features.
+
+A simple luminance lookup baseline is also included as a backup method.
 
 ---
 
-## 1. Methods included
+### 2. Video matting
 
-### Seminar 2 — Colourisation
+Two main matting methods were tested:
 
-Main methods:
+- **Robust Video Matting (RVM)**  
+  A video-oriented matting method, especially adapted to human subjects.
 
-1. **OpenCV/Zhang learning-based colourisation**  
-   Automatic deep-learning colourisation from grayscale frames.
+- **BackgroundMattingV2**  
+  A background-based matting method. Since no clean background capture was available, the background was estimated automatically using a temporal median over the video frames.
 
-2. **Local exemplar-based chrominance transfer**  
-   Transfers chrominance from a reference frame using local luminance/statistical features.
-
-Backup/baseline:
-
-3. **Luminance lookup colour transfer**  
-   Simple and fast baseline, useful if the deep model download fails.
-
-### Seminar 3 — Matting
-
-Main methods to count for the project:
-
-1. **Robust Video Matting (RVM)**  
-   Video-oriented recurrent method, especially adapted to human video matting.
-
-2. **Background Matting V2 / background-matting family**  
-   Background-based matting method. If no clean background image is provided, the script estimates one using the temporal median of the video frames.
-
-Extra baseline:
-
-3. **GrabCut + soft alpha**  
-   Classical segmentation baseline. It is useful for comparison, but it should be presented as a baseline rather than as one of the two main seminar methods.
-
-### Seminar 4 — Editing
-
-Main methods:
-
-1. **InstructPix2Pix**  
-   Instruction-based image editing applied frame-by-frame.
-
-2. **ControlNet Canny**  
-   Diffusion editing guided by Canny edge maps, used to preserve more of the original structure.
+A GrabCut soft-alpha baseline is also included for comparison.
 
 ---
 
-## 2. Folder structure
+### 3. Video editing
 
-Put your original videos in:
+Two diffusion-based editing methods were tested:
 
-```text
-input_videos/
-```
+- **InstructPix2Pix**  
+  Instruction-based image editing applied frame by frame.
 
-Recommended names:
+- **ControlNet Canny**  
+  Edge-guided diffusion editing using Canny maps as structural conditioning.
 
-```text
-input_videos/video1_simple.mp4
-input_videos/video2_street.mp4
-input_videos/video3_object.mp4
-```
-
-The scripts automatically create:
-
-```text
-processed_videos/       # 5s, 24 fps, resized videos
-frames/color/           # extracted colour frames
-frames/gray/            # extracted grayscale frames
-outputs/                # method outputs
-comparison_figures/     # before/after figures for slides
-```
+The main limitation observed in this part is that both methods are image editing methods applied independently to each frame. They do not explicitly enforce temporal consistency.
 
 ---
 
-## 3. Hardware note
+## Repository content
 
-The experiments were run on a desktop machine equipped with an **NVIDIA RTX 3090 GPU**.
+```text
+code/                  Python scripts for preprocessing, methods and figures
+comparison_figures/    Selected comparison figures used for the presentation
+metrics/               Computed quantitative indicators
+slides/                Final presentation slides
+requirements.txt       Python dependencies
+*.bat                  Windows scripts for easier execution
+README.md              Project documentation
+```
 
-However, the project should normally work with any **CUDA-compatible NVIDIA GPU**, provided that the correct PyTorch CUDA version is installed. Execution time will vary depending on the GPU.
-
-The project can also run on CPU, but the heavy deep-learning stages, especially **RVM**, **BackgroundMattingV2**, **InstructPix2Pix** and **ControlNet Canny**, will be much slower.
-
----
-
-## 4. Large outputs and final videos
-
-The repository is intended to contain the **code, scripts, README, requirements and selected comparison figures**.
-
-The following folders can become very large and should normally **not** be committed directly to GitHub:
+Large generated folders are not intended to be stored directly in the repository:
 
 ```text
 .venv/
@@ -125,39 +111,33 @@ outputs/
 input_videos/
 ```
 
-For the final rendered videos, the recommended solution is to upload them separately, for example to:
+---
+
+## Final videos and large outputs
+
+The final rendered videos and large generated outputs are provided separately through the GitHub Release associated with this repository:
 
 ```text
-Google Drive / OneDrive / GitHub Releases / Git LFS
+https://github.com/iNeKkaa/CV2526/releases/latest
 ```
 
-Then add the download link in this README or in the project submission.
-
-Recommended GitHub strategy:
-
-```text
-GitHub repository:
-- source code
-- scripts
-- README
-- requirements.txt
-- small comparison figures
-- optional short compressed demo clips
-
-External link:
-- full final videos
-- large generated outputs
-- model files if needed
-```
-
-This keeps the GitHub repository clean and easy to clone, while still making the final videos available for evaluation.
-
+This avoids storing very large videos directly in the Git history while keeping the repository easy to clone.
 
 ---
 
-## 5. Installation on Windows with a CUDA GPU
+## Hardware note
 
-Create and activate a virtual environment:
+The experiments were run on a desktop machine equipped with an **NVIDIA RTX 3090 GPU**.
+
+The project should normally work with any **CUDA-compatible NVIDIA GPU**, provided that the correct PyTorch CUDA version is installed. Execution time may vary depending on the GPU.
+
+The project can also run on CPU, but the heavy deep-learning stages, especially RVM, BackgroundMattingV2, InstructPix2Pix and ControlNet Canny, will be significantly slower.
+
+---
+
+## Installation
+
+Create a Python virtual environment:
 
 ```powershell
 python -m venv .venv
@@ -176,13 +156,13 @@ Install the remaining dependencies:
 pip install -r requirements.txt
 ```
 
-Check GPU detection:
+Check that the GPU is detected:
 
 ```powershell
 python code/verify_gpu.py
 ```
 
-You want to see something like:
+Expected result:
 
 ```text
 CUDA available: True
@@ -191,180 +171,75 @@ GPU: NVIDIA CUDA-compatible GPU
 
 ---
 
-## 6. Preprocess the videos
+## Running the project
 
-From the project root:
+### 1. Preprocess videos
+
+```powershell
+run_preprocess_windows.bat
+```
+
+This cuts the videos from 1s to 6s, converts them to 24 fps, resizes them and extracts frames.
+
+Equivalent command:
 
 ```powershell
 python code/00_prepare_videos.py --fps 24 --duration 5 --max_side 768 --start_time 1
 ```
 
-Or simply run:
-
-```powershell
-run_preprocess_windows.bat
-```
-
-This cuts from 1s to 6s, samples at 24 fps, resizes the largest side to 768 px, extracts colour and grayscale frames, and reconstructs clean processed videos.
-
-If you want another crop:
-
-```powershell
-python code/00_prepare_videos.py --fps 24 --duration 5 --max_side 768 --start_time 0
-```
-
 ---
 
-## 7. Run methods manually
-
-After preprocessing, check the names of the folders in `frames/color/`. Those are the `video_id` values.
-
-Example for `video1_simple`:
-
-### Colourisation
-
-```powershell
-python code/01_colourisation_opencv_zhang.py --video_id video1_simple --fps 24
-python code/02_colourisation_local_exemplar.py --video_id video1_simple --fps 24
-python code/02b_colourisation_luminance_lookup.py --video_id video1_simple --fps 24
-```
-
-### Matting
-
-Main methods:
-
-```powershell
-python code/03_matting_rvm.py --video_id video1_simple --fps 24 --model_type mobilenetv3
-python code/04b_matting_background_matting_v2.py --video_id video1_simple --fps 24 --model_type mobilenetv2
-```
-
-If you have a clean background image for a video, you can give it directly:
-
-```powershell
-python code/04b_matting_background_matting_v2.py --video_id video1_simple --fps 24 --background_path backgrounds/video1_clean_background.png
-```
-
-If no background image is provided, the script estimates one by median over the frames. This is useful, but also interesting to discuss: it works better with a stable camera and moving foreground, and worse with a moving camera or strongly changing background.
-
-Optional baseline:
-
-```powershell
-python code/04_matting_grabcut_softalpha.py --video_id video1_simple --fps 24
-```
-
-For the street video, if the person is not centered, adjust the GrabCut rectangle:
-
-```powershell
-python code/04_matting_grabcut_softalpha.py --video_id video2_street --fps 24 --rect 0.15 0.05 0.70 0.90
-```
-
-### Editing
-
-First test on a few frames:
-
-```powershell
-python code/05_editing_instruct_pix2pix.py --video_id video1_simple --fps 24 --limit 8 --prompt "make the scene look cinematic"
-python code/06_editing_controlnet_canny.py --video_id video1_simple --fps 24 --limit 8 --prompt "cinematic realistic video frame, high quality"
-```
-
-Then run the full 5-second video:
-
-```powershell
-python code/05_editing_instruct_pix2pix.py --video_id video1_simple --fps 24 --prompt "make the scene look cinematic"
-python code/06_editing_controlnet_canny.py --video_id video1_simple --fps 24 --prompt "cinematic realistic video frame, high quality"
-```
-
----
-
-## 8. Batch scripts
-
-### Preprocessing only
-
-```powershell
-run_preprocess_windows.bat
-```
-
-### Light test without heavy diffusion
-
-```powershell
-run_light_batch_windows.bat
-```
-
-This assumes preprocessing has already been run and then executes:
-
-```text
-backup colourisation + GrabCut baseline + figures
-```
-
-### GPU editing test
-
-```powershell
-run_gpu_test_windows.bat
-```
-
-This assumes preprocessing has already been run and then executes:
-
-```text
-GPU check + InstructPix2Pix test + ControlNet Canny test on a few frames
-```
-
-### Main seminar methods without full editing
+### 2. Run the main seminar methods
 
 ```powershell
 run_main_methods_windows.bat
 ```
 
-This assumes preprocessing has already been run and then executes:
+This runs the main methods used in the presentation:
 
 ```text
-two colourisation methods + RVM + BackgroundMattingV2 + figures
+Colourisation:
+- OpenCV / Zhang
+- Local exemplar colour transfer
+
+Matting:
+- RVM
+- BackgroundMattingV2
 ```
 
-It does **not** run preprocessing again. If you want to preprocess and then run the main methods in one command, use:
+---
+
+### 3. Run editing methods
+
+For a short test on a few frames:
+
+```powershell
+run_editing_test_windows.bat
+```
+
+For the full editing stage:
+
+```powershell
+run_editing_full_windows.bat
+```
+
+The full editing stage is expensive because diffusion models are applied frame by frame.
+
+---
+
+### 4. Run everything from scratch
 
 ```powershell
 run_all_from_scratch_windows.bat
 ```
 
-### Full heavy editing run
-
-```powershell
-run_full_gpu_windows.bat
-```
-
-This assumes preprocessing has already been run and then executes:
-
-```text
-full InstructPix2Pix + full ControlNet
-```
-
-Warning: the full editing run can be long even on a 3090 because it processes many frames with diffusion.
+This preprocesses the videos and runs the main pipeline.
 
 ---
 
-## 9. Batch command details
+## Metrics and figures
 
-You can also call the batch runner directly:
-
-```powershell
-python code/08_run_batch.py --stages colour matting_rvm matting_bmv2 figures --fps 24 --duration 5 --max_side 768 --start_time 1
-```
-
-For heavy GPU testing on only 8 frames:
-
-```powershell
-python code/08_run_batch.py --stages matting_rvm matting_bmv2 editing_test --fps 24 --limit 8
-```
-
-Full heavy editing:
-
-```powershell
-python code/08_run_batch.py --stages editing_full --fps 24
-```
-
----
-
-## 10. Create comparison figures for slides
+Comparison figures can be generated with:
 
 ```powershell
 python code/07_make_comparison_figures.py --video_id video1_simple --frame_index 20
@@ -372,33 +247,54 @@ python code/07_make_comparison_figures.py --video_id video2_street --frame_index
 python code/07_make_comparison_figures.py --video_id video3_object --frame_index 60
 ```
 
+The project computes simple indicators such as:
+
+- PSNR
+- SSIM
+- mean absolute error
+- temporal variation
+- alpha statistics for matting
+
+These metrics are used as support for the analysis, but they are not interpreted as perfect measures of perceptual quality.
+
 ---
 
-## 11. Cleaning the virtual environment
+## Main observations
 
-At the end of the project, if you want to free disk space, you can delete the local Python virtual environment with:
+### Colourisation
 
-```bat
-delete_venv_windows.bat
-```
+Colourisation produced the most stable results.  
+The structure of the video was mostly preserved, because the task mainly modifies colour information rather than geometry.
 
-This only removes the `.venv/` folder inside the project. It does not delete input videos, outputs, slides, code, or generated figures. If you need to run the project again later, simply run `setup_windows.bat` again to recreate the environment.
+The local exemplar method was closer to the original colours according to PSNR, but it depends strongly on the selected reference frame.
 
-Note: the largest files may also be model caches downloaded by PyTorch / Hugging Face outside the project folder. Do not delete them unless you know you do not need them anymore.
+### Matting
 
-### Editing on GPU
+Matting was more challenging because it requires accurate foreground extraction and soft alpha boundaries.
 
-First run a short editing test on 8 frames per video:
+RVM was generally more robust on human subjects. BackgroundMattingV2 was more sensitive to the quality of the estimated background.
 
-```powershell
-run_editing_test_windows.bat
-```
+### Editing
 
-If it works and CUDA is detected, run the full editing stage:
+Editing produced the most visually unstable results.
 
-```powershell
-run_editing_full_windows.bat
-```
+Some individual frames were visually interesting, but reconstructed videos showed flickering, subject deformation, identity drift, background drift and hallucinated details.
 
-The full editing stage is expensive because InstructPix2Pix and ControlNet are applied frame by frame.
+The main reason is that the editing methods were applied frame by frame, without temporal memory.
 
+---
+
+## Conclusion
+
+This project shows that applying image-based methods to videos is not enough to obtain stable video results.
+
+Colourisation was relatively coherent, matting depended strongly on the subject and background assumptions, and editing revealed major temporal consistency issues.
+
+The main lesson is that video processing is not only about applying powerful image methods frame by frame. It also requires preserving **temporal coherence** across time.
+
+Possible improvements include:
+
+- using real video diffusion models;
+- adding optical-flow-based temporal smoothing;
+- using a clean background image for BackgroundMattingV2;
+- performing more systematic parameter tuning.
