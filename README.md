@@ -1,6 +1,6 @@
 # CV Seminars Project — Colourisation, Matting and Editing
 
-This project skeleton (v8, RTX 3090-ready with fixed BackgroundMattingV2 TorchScript loading) is designed for the Computer Vision seminars project.
+This project skeleton is designed for the Computer Vision seminars project. It was tested on an NVIDIA RTX 3090 GPU, but it should normally work with any CUDA-compatible NVIDIA GPU, provided that the correct PyTorch CUDA version is installed.
 It processes the same 3 short videos through several methods from Seminars 2–4.
 
 The project is intentionally built as an experimental pipeline: the goal is not to obtain perfect videos, but to compare methods and discuss their strengths, weaknesses, artefacts, temporal coherence and computation cost.
@@ -100,7 +100,62 @@ comparison_figures/     # before/after figures for slides
 
 ---
 
-## 3. Installation on Windows with RTX 3090
+## 3. Hardware note
+
+The experiments were run on a desktop machine equipped with an **NVIDIA RTX 3090 GPU**.
+
+However, the project should normally work with any **CUDA-compatible NVIDIA GPU**, provided that the correct PyTorch CUDA version is installed. Execution time will vary depending on the GPU.
+
+The project can also run on CPU, but the heavy deep-learning stages, especially **RVM**, **BackgroundMattingV2**, **InstructPix2Pix** and **ControlNet Canny**, will be much slower.
+
+---
+
+## 4. Large outputs and final videos
+
+The repository is intended to contain the **code, scripts, README, requirements and selected comparison figures**.
+
+The following folders can become very large and should normally **not** be committed directly to GitHub:
+
+```text
+.venv/
+models/
+frames/
+processed_videos/
+outputs/
+input_videos/
+```
+
+For the final rendered videos, the recommended solution is to upload them separately, for example to:
+
+```text
+Google Drive / OneDrive / GitHub Releases / Git LFS
+```
+
+Then add the download link in this README or in the project submission.
+
+Recommended GitHub strategy:
+
+```text
+GitHub repository:
+- source code
+- scripts
+- README
+- requirements.txt
+- small comparison figures
+- optional short compressed demo clips
+
+External link:
+- full final videos
+- large generated outputs
+- model files if needed
+```
+
+This keeps the GitHub repository clean and easy to clone, while still making the final videos available for evaluation.
+
+
+---
+
+## 5. Installation on Windows with a CUDA GPU
 
 Create and activate a virtual environment:
 
@@ -131,12 +186,12 @@ You want to see something like:
 
 ```text
 CUDA available: True
-GPU: NVIDIA GeForce RTX 3090
+GPU: NVIDIA CUDA-compatible GPU
 ```
 
 ---
 
-## 4. Preprocess the videos
+## 6. Preprocess the videos
 
 From the project root:
 
@@ -160,7 +215,7 @@ python code/00_prepare_videos.py --fps 24 --duration 5 --max_side 768 --start_ti
 
 ---
 
-## 5. Run methods manually
+## 7. Run methods manually
 
 After preprocessing, check the names of the folders in `frames/color/`. Those are the `video_id` values.
 
@@ -221,7 +276,7 @@ python code/06_editing_controlnet_canny.py --video_id video1_simple --fps 24 --p
 
 ---
 
-## 6. Batch scripts
+## 8. Batch scripts
 
 ### Preprocessing only
 
@@ -287,7 +342,7 @@ Warning: the full editing run can be long even on a 3090 because it processes ma
 
 ---
 
-## 7. Batch command details
+## 9. Batch command details
 
 You can also call the batch runner directly:
 
@@ -309,7 +364,7 @@ python code/08_run_batch.py --stages editing_full --fps 24
 
 ---
 
-## 8. Create comparison figures for slides
+## 10. Create comparison figures for slides
 
 ```powershell
 python code/07_make_comparison_figures.py --video_id video1_simple --frame_index 20
@@ -319,7 +374,7 @@ python code/07_make_comparison_figures.py --video_id video3_object --frame_index
 
 ---
 
-## Cleaning the virtual environment
+## 11. Cleaning the virtual environment
 
 At the end of the project, if you want to free disk space, you can delete the local Python virtual environment with:
 
@@ -330,6 +385,48 @@ delete_venv_windows.bat
 This only removes the `.venv/` folder inside the project. It does not delete input videos, outputs, slides, code, or generated figures. If you need to run the project again later, simply run `setup_windows.bat` again to recreate the environment.
 
 Note: the largest files may also be model caches downloaded by PyTorch / Hugging Face outside the project folder. Do not delete them unless you know you do not need them anymore.
+
+
+---
+
+## 12. GitHub upload note
+
+If GitHub rejects a push because a file is larger than 100 MB, do not commit the large output or model file directly.
+
+If the large files were added only in the last local commit, remove them from Git tracking while keeping them on disk:
+
+```powershell
+git rm -r --cached .venv models frames processed_videos outputs input_videos
+git add .gitignore README.md code requirements.txt *.bat
+git commit --amend
+git push
+```
+
+If the repository history already contains large files in older commits, the easiest solution for this project is often to create a clean repository and copy only the lightweight project files into it.
+
+Recommended `.gitignore` entries:
+
+```gitignore
+.venv/
+__pycache__/
+*.pyc
+
+models/
+frames/
+processed_videos/
+outputs/
+input_videos/
+
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.caffemodel
+*.pth
+*.pt
+*.safetensors
+```
+
 
 
 ### Editing on GPU
