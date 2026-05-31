@@ -7,17 +7,6 @@ The project is intentionally built as an experimental pipeline: the goal is not 
 
 ---
 
-### v8 notes
-
-This version includes the latest fixes used during debugging:
-
-- RVM uses an explicit `downsample_ratio=0.25`.
-- BackgroundMattingV2 uses the TorchScript model instead of `torch.hub`, because the official repository does not expose a `hubconf.py`.
-- Video detection is deduplicated on Windows.
-- The default cut is still from 1s to 6s, 24 fps.
-- Extra batch scripts are provided for editing: `run_editing_test_windows.bat` and `run_editing_full_windows.bat`.
-
-
 ## 0. Important preprocessing choice
 
 By default, the scripts cut the videos as follows:
@@ -330,34 +319,6 @@ python code/07_make_comparison_figures.py --video_id video3_object --frame_index
 
 ---
 
-## 9. Notes for the final presentation
-
-The final slides should focus on:
-
-- Why the 3 videos are different and useful.
-- Which methods were used for each topic.
-- Any adaptations made: 1s crop, resizing, fps, frame extraction, prompts, reference frame, estimated background.
-- Visual comparison between methods.
-- Main errors and limitations:
-  - colour bleeding,
-  - wrong semantic colours,
-  - matting holes,
-  - rough alpha boundaries,
-  - background estimation errors,
-  - flickering,
-  - diffusion frame inconsistency,
-  - loss of identity or geometry,
-  - computation time.
-- Why some methods work better on simple background, complex street background, or non-human objects.
-
-Suggested interpretation for the matting part:
-
-```text
-RVM does not require a clean background and is designed for video matting, so it should be more stable on human videos.
-BackgroundMattingV2 uses background information, so it can be strong when the background is known or well estimated, but it is more sensitive to camera motion and imperfect background estimation.
-GrabCut is kept only as a classical baseline to show the gap between simple segmentation and modern alpha matting.
-```
-
 ## Cleaning the virtual environment
 
 At the end of the project, if you want to free disk space, you can delete the local Python virtual environment with:
@@ -370,16 +331,8 @@ This only removes the `.venv/` folder inside the project. It does not delete inp
 
 Note: the largest files may also be model caches downloaded by PyTorch / Hugging Face outside the project folder. Do not delete them unless you know you do not need them anymore.
 
-## v7 fix notes
 
-This version fixes the RVM script naming consistency:
-
-- `03_matting_rvm.py` now imports `ensure_dir` and `write_video_from_frames`, which are the actual utility function names used in `utils_video.py`.
-- RVM now uses `downsample_ratio = 0.25` by default instead of `None`, avoiding a PyTorch `interpolate` error.
-- `08_run_batch.py` passes `--downsample_ratio 0.25` explicitly when running RVM.
-- Running on a laptop without CUDA is normal: the script will use CPU and print a warning. On the desktop with the RTX 3090, it should print `Device used: cuda` if PyTorch CUDA is correctly installed.
-
-### Editing on the RTX 3090
+### Editing on GPU
 
 First run a short editing test on 8 frames per video:
 
