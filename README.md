@@ -14,7 +14,7 @@ The project focuses not only on visual quality, but also on the analysis of arte
 
 ## Authors
 
-- Antoine Metz — u271676
+- Antoine Metz — u271676 @iNeKkaa
 - Corentin Le Bris — u271785
 
 ---
