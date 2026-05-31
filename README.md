@@ -386,49 +386,6 @@ This only removes the `.venv/` folder inside the project. It does not delete inp
 
 Note: the largest files may also be model caches downloaded by PyTorch / Hugging Face outside the project folder. Do not delete them unless you know you do not need them anymore.
 
-
----
-
-## 12. GitHub upload note
-
-If GitHub rejects a push because a file is larger than 100 MB, do not commit the large output or model file directly.
-
-If the large files were added only in the last local commit, remove them from Git tracking while keeping them on disk:
-
-```powershell
-git rm -r --cached .venv models frames processed_videos outputs input_videos
-git add .gitignore README.md code requirements.txt *.bat
-git commit --amend
-git push
-```
-
-If the repository history already contains large files in older commits, the easiest solution for this project is often to create a clean repository and copy only the lightweight project files into it.
-
-Recommended `.gitignore` entries:
-
-```gitignore
-.venv/
-__pycache__/
-*.pyc
-
-models/
-frames/
-processed_videos/
-outputs/
-input_videos/
-
-*.mp4
-*.avi
-*.mov
-*.mkv
-*.caffemodel
-*.pth
-*.pt
-*.safetensors
-```
-
-
-
 ### Editing on GPU
 
 First run a short editing test on 8 frames per video:
